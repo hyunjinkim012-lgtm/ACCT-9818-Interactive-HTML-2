@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Fraud Detection Model Performance Calculator</title>
+<style>
+:root{color-scheme:light;--ink:#17283c;--muted:#526377;--line:#d9e2eb;--blue:#1856a5;--soft:#eff5fc;--green:#eaf7ef;--rose:#fff0ee}
+*{box-sizing:border-box}body{margin:0;background:#f4f7fb;color:var(--ink);font:15px/1.5 system-ui,-apple-system,Segoe UI,Arial,sans-serif}.wrap{max-width:1100px;margin:40px auto;padding:0 20px 48px}h1{font-size:clamp(1.5rem,3vw,2.2rem);margin:0 0 7px}h2{font-size:1.17rem;margin:0 0 16px}.intro{color:var(--muted);margin:0 0 24px}.panel{background:white;border:1px solid var(--line);border-radius:14px;padding:23px;margin:0 0 20px;box-shadow:0 3px 16px #203d5c0a}.controls{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px}label{display:block;font-weight:700;margin-bottom:7px}select{width:100%;border:1px solid #a9bbcf;border-radius:8px;padding:11px;font:inherit;background:white;color:var(--ink)}select:focus-visible,button:focus-visible{outline:3px solid #79b6ff;outline-offset:2px}.small{font-size:.84rem;color:var(--muted)}.actions{display:flex;justify-content:space-between;gap:10px;align-items:center;margin-top:14px;flex-wrap:wrap}button{padding:9px 16px;border-radius:8px;border:1px solid #9ab4d2;background:#f4f8ff;color:#17447d;font-weight:700;cursor:pointer}button:hover{background:#e8f2ff}.scroll{overflow-x:auto}table{width:100%;border-collapse:collapse;min-width:660px}th,td{border:1px solid var(--line);padding:13px 12px;text-align:left;vertical-align:middle}thead th{background:#e8f0fa;color:#203e62;font-weight:750}tbody th{background:#f7faff;font-weight:700}.matrix{table-layout:fixed}.matrix td{text-align:center;font-weight:750;font-size:1.2rem}.matrix thead th{text-align:center}.matrix .rowname{text-align:left;font-size:.95rem}.good{background:var(--green)}.bad{background:var(--rose)}.sub{display:block;font-size:.77rem;font-weight:500;color:var(--muted);margin-top:2px}.metrics td.result{font-size:1.13rem;font-weight:800;color:#174b8d;white-space:nowrap}.metrics td.formula{font-family:ui-monospace,SFMono-Regular,Consolas,monospace;font-size:.88rem}.metrics td.values{font-family:ui-monospace,SFMono-Regular,Consolas,monospace;font-size:.86rem}.metrics td:last-child{min-width:210px}.note{margin:12px 0 0;font-size:.85rem;color:var(--muted)}.pill{display:inline-block;border:1px solid #cadbed;background:#f1f6fd;border-radius:999px;padding:4px 10px;font-size:.86rem;color:#345776}@media(max-width:720px){.wrap{margin:20px auto}.panel{padding:16px}.controls{grid-template-columns:repeat(2,minmax(0,1fr))}th,td{padding:10px 9px}}@media(max-width:420px){.controls{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<main class="wrap">
+<h1>Fraud Detection Model Performance Calculator</h1>
+<p class="intro">Select confusion matrix counts to instantly recalculate classification performance and view every formula.</p>
+<section class="panel" aria-labelledby="inputs-title"><h2 id="inputs-title">1. Confusion Matrix Inputs</h2><div class="controls">
+<div><label for="tp">True Positives (TP)</label><select id="tp"></select><span class="small">Actual fraud, predicted fraud</span></div>
+<div><label for="fp">False Positives (FP)</label><select id="fp"></select><span class="small">Actual non-fraud, predicted fraud</span></div>
+<div><label for="fn">False Negatives (FN)</label><select id="fn"></select><span class="small">Actual fraud, predicted non-fraud</span></div>
+<div><label for="tn">True Negatives (TN)</label><select id="tn"></select><span class="small">Actual non-fraud, predicted non-fraud</span></div>
+</div><div class="actions"><span class="pill" id="total" aria-live="polite">Total observations: 300</span><button type="button" id="reset">Reset to starting values</button></div></section>
+<section class="panel" aria-labelledby="matrix-title"><h2 id="matrix-title">2. Confusion Matrix</h2><div class="scroll"><table class="matrix"><thead><tr><th scope="col">Actual \ Predicted</th><th scope="col">Predicted Fraud</th><th scope="col">Predicted Non-Fraud</th></tr></thead><tbody><tr><th scope="row" class="rowname">Actual Fraud</th><td class="good"><span id="matrix-tp">80</span><span class="sub">True Positives (TP)</span></td><td class="bad"><span id="matrix-fn">30</span><span class="sub">False Negatives (FN)</span></td></tr><tr><th scope="row" class="rowname">Actual Non-Fraud</th><td class="bad"><span id="matrix-fp">20</span><span class="sub">False Positives (FP)</span></td><td class="good"><span id="matrix-tn">170</span><span class="sub">True Negatives (TN)</span></td></tr></tbody></table></div></section>
+<section class="panel" aria-labelledby="metrics-title"><h2 id="metrics-title">3. Performance Metrics — Excel-Style Calculation Table</h2><div class="scroll"><table class="metrics"><thead><tr><th scope="col">Metric</th><th scope="col">Formula</th><th scope="col">Substituted Values</th><th scope="col">Result</th><th scope="col">Explanation</th></tr></thead><tbody>
+<tr><th scope="row">Accuracy</th><td class="formula">(TP + TN) / (TP + FP + FN + TN)</td><td class="values" id="accuracy-values"></td><td class="result" id="accuracy-result"></td><td>Percentage of all cases classified correctly.</td></tr>
+<tr><th scope="row">Precision</th><td class="formula">TP / (TP + FP)</td><td class="values" id="precision-values"></td><td class="result" id="precision-result"></td><td>Of cases predicted as fraud, the proportion that actually were fraud.</td></tr>
+<tr><th scope="row">Recall</th><td class="formula">TP / (TP + FN)</td><td class="values" id="recall-values"></td><td class="result" id="recall-result"></td><td>Of actual fraud cases, the proportion correctly identified as fraud.</td></tr>
+<tr><th scope="row">F1 Score</th><td class="formula">2 × (Precision × Recall) / (Precision + Recall)</td><td class="values" id="f1-values"></td><td class="result" id="f1-result"></td><td>Harmonic mean of precision and recall; balances the two.</td></tr>
+</tbody></table></div><p class="note">All metrics are shown as percentages to two decimal places. When a denominator is zero, the metric displays <strong>N/A</strong> instead of dividing by zero. F1 is calculated equivalently as 2 × TP / (2 × TP + FP + FN), avoiding rounding errors.</p></section>
+</main>
+<script>
+'use strict';
+const defaults={tp:80,fp:20,fn:30,tn:170};
+const keys=Object.keys(defaults);
+const $=id=>document.getElementById(id);
+for(const key of keys){const select=$(key);for(let n=0;n<=500;n++){const option=document.createElement('option');option.value=String(n);option.textContent=String(n);select.appendChild(option);}select.value=String(defaults[key]);select.addEventListener('change',update);}
+$('reset').addEventListener('click',()=>{for(const key of keys)$(key).value=String(defaults[key]);update();});
+const div=(num,den)=>den===0?null:num/den;
+const display=value=>value===null?'N/A':(value*100).toFixed(2)+'%';
+const decimal=value=>value===null?'N/A':value.toFixed(4);
+function setMetric(name,values,result){$(name+'-values').textContent=values;$(name+'-result').textContent=display(result);}
+function update(){
+const {tp,fp,fn,tn}=Object.fromEntries(keys.map(k=>[k,Number($(k).value)]));
+for(const key of keys)$('matrix-'+key).textContent=String(({tp,fp,fn,tn})[key]);
+const total=tp+fp+fn+tn;
+$('total').textContent='Total observations: '+total.toLocaleString('en-US');
+const accuracy=div(tp+tn,total),precision=div(tp,tp+fp),recall=div(tp,tp+fn);
+const f1=div(2*tp,2*tp+fp+fn);
+setMetric('accuracy',`(${tp} + ${tn}) / (${tp} + ${fp} + ${fn} + ${tn}) = ${tp+tn} / ${total}`,accuracy);
+setMetric('precision',`${tp} / (${tp} + ${fp}) = ${tp} / ${tp+fp}`,precision);
+setMetric('recall',`${tp} / (${tp} + ${fn}) = ${tp} / ${tp+fn}`,recall);
+const f1Text=precision===null||recall===null?`Precision or Recall undefined; equivalent counts: (2 × ${tp}) / (2 × ${tp} + ${fp} + ${fn})`: `2 × (${decimal(precision)} × ${decimal(recall)}) / (${decimal(precision)} + ${decimal(recall)})`;
+setMetric('f1',f1Text+'; counts: '+(2*tp)+' / '+(2*tp+fp+fn),f1);
+}
+update();
+</script>
+</body>
+</html>
